@@ -31,10 +31,6 @@ df_nat.loc[(df_nat['sector']=='LULUCF'), 'sectorsorted'] = '0 LULUCF'
 df_nat = df_nat.sort_values(['sectorsorted', 'year'], ascending=[True, True])
 
 
-#plotly figure
-fig = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector",)
-fig.show()
-
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -42,28 +38,43 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
     dcc.Graph(id='graph-with-sliders'),
-    dcc.Slider(
-        id='year-slider',
-        min=1,
-        max=5,
-        value=1,
-        step=1
-    )
+    html.H2('Agriculture emissions trend:'),
+    dcc.Slider(id='agri-emis-slider', min=-20, max=20, value=0.54, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+    html.H2('LULUCF emissions trend:'),
+    dcc.Slider(id='lulucf-emis-slider', min=-20, max=20, value=-12.2, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)})
 ])
 
 
 @app.callback(
     Output('graph-with-sliders', 'figure'),
-    [Input('year-slider', 'value')])
-def update_figure(selected_year):
-    fig = px.area(df_nat, x="year", y="emissions_MtCo2_output", line_group="sector", color="sector")
+    [Input('agri-emis-slider', 'value'),
+     Input('lulucf-emis-slider', 'value')])
+def update_figure(agri_emis_trend, lulucf_emis_trend):
+    ### Emissions output agriculutre: emissions levels at last observation, minus number of years since final observation *annual emission reductions
+    df_nat.loc[(df_nat['sector']=='Agriculture') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+agri_emis_trend*df_nat['yrs_since_final_obs']
+    # Agri emissions cannot go negative:
+    df_nat.loc[(df_nat['sector']=='Agriculture') & (df_nat['emissions_MtCo2_output']>0), 'emissions_MtCo2_output'] = 0
+    ### Emissions output LULUCF: emissions levels at last observation, minus number of years since final observation *annual emission reductions
+    df_nat.loc[(df_nat['sector']=='LULUCF') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+lulucf_emis_trend*df_nat['yrs_since_final_obs']
+    
+    fig = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector")
     fig.update_layout(transition_duration=500)
 
     return fig
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
     
     
+# @app.callback(
+#     Output('map-graph', 'figure'),
+#     [Input('Slide1', 'value'),
+#     Input('Slide2', 'value')])
+
+# def map_selection(valorslide1, valorslide2):
+#     map_aux = map_aux[map_aux['Critério1']==valorslide1]
+#     map_aux = map_aux[map_aux['Critério2']==valorslide2]
+#     trace=...
+#     layout=...
+#     return {'data': trace, 'layout': layout}
     
