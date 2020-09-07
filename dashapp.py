@@ -66,15 +66,3 @@ if __name__ == '__main__':
     app.run_server(debug=True)
     
     
-# @app.callback(
-#     Output('map-graph', 'figure'),
-#     [Input('Slide1', 'value'),
-#     Input('Slide2', 'value')])
-
-# def map_selection(valorslide1, valorslide2):
-#     map_aux = map_aux[map_aux['Critério1']==valorslide1]
-#     map_aux = map_aux[map_aux['Critério2']==valorslide2]
-#     trace=...
-#     layout=...
-#     return {'data': trace, 'layout': layout}
-    
