@@ -11,6 +11,7 @@
 #exec(open('./calcprep.py').read())
 
 # Packages 
+import os
 import pandas as pd
 import numpy as np
 import re # for some string manipulation with regex
@@ -24,7 +25,11 @@ import plotly.express as px
 ### Import the prepped data
 df_final = pd.read_csv('./db/preppeddata.csv') 
 df_nat = df_final[(df_final['geo']=='National') & (df_final['year']>=2005)]
-df_nat.loc[(df_nat['sector']=='LULUCF'), 'sector'] = 'zLULUCF'
+# get good sort, with LULUCF as first one, then others on top
+df_nat['sectorsorted'] =df_nat['sector']
+df_nat.loc[(df_nat['sector']=='LULUCF'), 'sectorsorted'] = '0 LULUCF'
+df_nat = df_nat.sort_values(['sectorsorted', 'year'], ascending=[True, True])
+
 
 #plotly figure
 fig = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector",)
@@ -36,7 +41,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
-    dcc.Graph(id='graph-with-slider'),
+    dcc.Graph(id='graph-with-sliders'),
     dcc.Slider(
         id='year-slider',
         min=1,
@@ -48,7 +53,7 @@ app.layout = html.Div([
 
 
 @app.callback(
-    Output('graph-with-slider', 'figure'),
+    Output('graph-with-sliders', 'figure'),
     [Input('year-slider', 'value')])
 def update_figure(selected_year):
     fig = px.area(df_nat, x="year", y="emissions_MtCo2_output", line_group="sector", color="sector")
