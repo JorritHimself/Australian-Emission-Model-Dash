@@ -15,7 +15,7 @@ Copy the contents of WSIG for python anywhere.txt into the pyhton anywhere, in t
 Make sure you change the run the app with:  
  `if __name__ == '__main__':
 `
- `app.run_server()`
+ `app.run_server()`  
 Import the prepped data
  correctly with full directory:  
 `df_final = pd.read_csv('/home/JorritHimself/mysite/db/preppeddata.csv')`
