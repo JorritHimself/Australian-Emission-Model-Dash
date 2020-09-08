@@ -6,7 +6,7 @@ Easiest is to use anaconda navigator.
 Go to 'environments', impot, and select the environment.yml file. 
 
 Alternatively, via conda:  
-`conda env create -f environment.yml`
+`conda env create -f environment.yml`  
 followed by  
 `activate ausenergydash`
 
