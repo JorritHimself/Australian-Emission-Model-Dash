@@ -11,7 +11,7 @@
 #exec(open('./calcprep.py').read())
 
 # Packages 
-import os
+#import os
 import pandas as pd
 import numpy as np
 import re # for some string manipulation with regex
@@ -55,10 +55,10 @@ app.layout = html.Div([
 def update_figure(agri_emis_trend, elec_emis_trend, lulucf_emis_trend):
     ### Emissions output agriculutre: emissions levels at last observation, minus number of years since final observation *annual emission reductions. Second line si so they cannot go negative
     df_nat.loc[(df_nat['sector']=='Agriculture') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+agri_emis_trend*df_nat['yrs_since_final_obs']
-    df_nat.loc[(df_nat['sector']=='Agriculture') & (df_nat['emissions_MtCo2_output']>0), 'emissions_MtCo2_output'] = 0
+    df_nat.loc[(df_nat['sector']=='Agriculture') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
     ### Emissions output electricity: emissions levels at last observation, minus number of years since final observation *annual emission reductions. Second line si so they cannot go negative
     df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+elec_emis_trend*df_nat['yrs_since_final_obs']
-    df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['emissions_MtCo2_output']>0), 'emissions_MtCo2_output'] = 0
+    df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
         ### Emissions output LULUCF: emissions levels at last observation, minus number of years since final observation *annual emission reductions
     df_nat.loc[(df_nat['sector']=='LULUCF') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+lulucf_emis_trend*df_nat['yrs_since_final_obs']
     

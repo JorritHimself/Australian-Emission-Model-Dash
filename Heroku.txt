@@ -1,0 +1,25 @@
+Follow instructions on https://devcenter.heroku.com/articles/getting-started-with-python?singlepage=true  
+Install Heroku command line interface  
+`$ heroku login`  
+cd into location where you wnat the app to live  
+git clone https://github.com/heroku/python-getting-started.git
+cd python-getting-started
+heroku create
+git push heroku main
+
+#Connect with an app online:
+heroku git:remote -a aus-emissions-model-dash
+
+# Changes to ding:
+git add .
+git commit -m "Demo"
+git push heroku main
+heroku open
+
+
+#Local version
+pip install -r requirements.txt
+python manage.py collectstatic
+heroku local web -f Procfile.windows
+heroku local web
+
