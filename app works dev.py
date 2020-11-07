@@ -58,8 +58,8 @@ app.layout = html.Div([
             ]),
         dbc.Row([
             dbc.Col(html.Div([
-                html.H6('Agriculture & Forestry emissions trend:'),
-                dcc.Slider(id='agrifor-emis-slider', min=-20, max=20, value=0.54, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Agriculture emissions trend:'),
+                dcc.Slider(id='agri-emis-slider', min=-20, max=20, value=0.54, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
                 html.H6('Electricity generation emissions trend:'),
                 dcc.Slider(id='elec-emis-slider', min=-20, max=20, value=-1.96, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
                 html.H6('LULUCF emissions trend:'),
@@ -73,13 +73,13 @@ app.layout = html.Div([
 #### Dynamic output based on user input
 @app.callback(
     Output('emissions-total', 'figure'),
-    [Input('agrifor-emis-slider', 'value'),
+    [Input('agri-emis-slider', 'value'),
      Input('elec-emis-slider', 'value'),
      Input('lulucf-emis-slider', 'value')]
     )
-def update_figure(agrifor_emis_trend, elec_emis_trend, lulucf_emis_trend):
+def update_figure(agri_emis_trend, elec_emis_trend, lulucf_emis_trend):
     ### Emissions output agriculutre: emissions levels at last observation, minus number of years since final observation *annual emission reductions. Second line si so they cannot go negative
-    df_nat.loc[(df_nat['sector']=='Agriculture & Forestry') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+agrifor_emis_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Agriculture & Forestry') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+agri_emis_trend*df_nat['yrs_since_final_obs']
     df_nat.loc[(df_nat['sector']=='Agriculture & Forestry') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
     ### Emissions output electricity: emissions levels at last observation, minus number of years since final observation *annual emission reductions. Second line si so they cannot go negative
     df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+elec_emis_trend*df_nat['yrs_since_final_obs']

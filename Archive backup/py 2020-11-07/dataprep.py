@@ -112,10 +112,9 @@ df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Electricity'),'Electr
 df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Electricity generation generation'),'Electricity generation')
 ### Note National invetory here, for 'Agriculture & Forestry' is lablled as agriculture here, to ease with data management
 # Fix variants of agriculture and forestry as a sector
-df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture'),'Agriculture & Forestry')
-df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture & Forestry & Forestry'),'Agriculture & Forestry')
-df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture & Forestry (note that includes Forestry)'),'Agriculture & Forestry')
-df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture & Forestry (note that econ. output component includes Forestry)'),'Agriculture & Forestry')
+df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture & Forestry'),'Agriculture')
+df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture (note that includes Forestry)'),'Agriculture')
+df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Agriculture (note that econ. output component includes Forestry)'),'Agriculture')
 # turn non-sectoral data into overall vars
 df_nat['sector'] = df_nat['sector'].str.replace('RBA Inflator','Overall')
 df_nat['sector'] = df_nat['sector'].str.replace(re.escape('Population (millions)'),'Overall')
