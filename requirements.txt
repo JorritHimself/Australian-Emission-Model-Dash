@@ -1,127 +1,157 @@
-alabaster==0.7.12
-argh==0.26.2
-astroid @ file:///C:/ci/astroid_1592495992870/work
-atomicwrites==1.4.0
-attrs @ file:///tmp/build/80754af9/attrs_1598374659300/work
-autopep8 @ file:///tmp/build/80754af9/autopep8_1596578164842/work
-Babel==2.8.0
-backcall==0.2.0
-bcrypt @ file:///C:/ci/bcrypt_1597936262193/work
-bleach==3.1.5
-brotlipy==0.7.0
-certifi==2020.6.20
-cffi @ file:///C:/ci/cffi_1598370861361/work
-chardet==3.0.4
-click==7.1.2
-cloudpickle @ file:///tmp/build/80754af9/cloudpickle_1594141588948/work
-colorama==0.4.3
-cryptography @ file:///C:/ci/cryptography_1598371491688/work
-dash @ file:///tmp/build/80754af9/dash_1599164850084/work
-dash-bootstrap-components @ file:///home/conda/feedstock_root/build_artifacts/dash-bootstrap-components_1601845474246/work
-dash-core-components==1.3.1
-dash-html-components==1.0.1
-dash-renderer==1.1.2
-dash-table==4.4.1
-decorator==4.4.2
-defusedxml==0.6.0
-diff-match-patch @ file:///tmp/build/80754af9/diff-match-patch_1594828741838/work
-docutils==0.16
-entrypoints==0.3
-flake8==3.8.3
-Flask==1.1.2
-Flask-Compress==1.5.0
-future==0.18.2
-idna @ file:///tmp/build/80754af9/idna_1593446292537/work
-imagesize==1.2.0
-importlib-metadata @ file:///C:/ci/importlib-metadata_1593431910144/work
-intervaltree @ file:///tmp/build/80754af9/intervaltree_1598376443606/work
-ipykernel @ file:///C:/ci/ipykernel_1596206775157/work/dist/ipykernel-5.3.4-py3-none-any.whl
-ipython @ file:///C:/ci/ipython_1593446240034/work
-ipython-genutils==0.2.0
-isort @ file:///C:/ci/isort_1597579650240/work
-itsdangerous==1.1.0
-jedi @ file:///C:/ci/jedi_1592841982010/work
-Jinja2==2.11.2
-jsonschema==3.2.0
-jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1594826976318/work
-jupyter-core==4.6.3
-keyring @ file:///C:/ci/keyring_1598375873808/work
-lazy-object-proxy==1.4.3
-MarkupSafe==1.1.1
-mccabe==0.6.1
-mistune==0.8.4
-mkl-fft==1.1.0
-mkl-random==1.1.1
-mkl-service==2.3.0
-nbconvert==5.6.1
-nbformat==5.0.7
-numpy @ file:///C:/ci/numpy_and_numpy_base_1596233948451/work
-numpydoc @ file:///tmp/build/80754af9/numpydoc_1594166760263/work
-packaging==20.4
-pandas @ file:///C:/ci/pandas_1598353517372/work
-pandocfilters==1.4.2
-paramiko==2.7.1
-parso==0.7.0
-pathtools==0.1.2
-pexpect==4.8.0
-pickleshare==0.7.5
-plotly @ file:///tmp/build/80754af9/plotly_1597716491413/work
-pluggy==0.13.1
-prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1598623940270/work
-psutil @ file:///C:/ci/psutil_1598352185190/work
-pycodestyle==2.6.0
-pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
-pydocstyle @ file:///tmp/build/80754af9/pydocstyle_1598372967467/work
-pyflakes==2.2.0
-Pygments==2.6.1
-pylint @ file:///C:/ci/pylint_1598624066230/work
-PyNaCl @ file:///C:/ci/pynacl_1595009245871/work
-pyOpenSSL @ file:///tmp/build/80754af9/pyopenssl_1594392929924/work
-pyparsing==2.4.7
-pyrsistent==0.16.0
-PySocks==1.7.1
-python-dateutil==2.8.1
-python-jsonrpc-server @ file:///tmp/build/80754af9/python-jsonrpc-server_1594397536060/work
-python-language-server @ file:///C:/ci/python-language-server_1594159702692/work
-pytz==2020.1
-pywin32==227
-pywin32-ctypes==0.2.0
-PyYAML==5.3.1
-pyzmq==19.0.1
-QDarkStyle==2.8.1
-QtAwesome==0.7.2
-qtconsole @ file:///tmp/build/80754af9/qtconsole_1598374667791/work
-QtPy==1.9.0
-requests @ file:///tmp/build/80754af9/requests_1592841827918/work
-retrying==1.3.3
-rope==0.17.0
-Rtree==0.9.4
-six==1.15.0
-snowballstemmer==2.0.0
-sortedcontainers==2.2.2
-Sphinx @ file:///tmp/build/80754af9/sphinx_1597428793432/work
-sphinxcontrib-applehelp==1.0.2
-sphinxcontrib-devhelp==1.0.2
-sphinxcontrib-htmlhelp==1.0.3
-sphinxcontrib-jsmath==1.0.1
-sphinxcontrib-qthelp==1.0.3
-sphinxcontrib-serializinghtml==1.1.4
-spyder @ file:///C:/ci/spyder_1594825773579/work
-spyder-kernels @ file:///C:/ci/spyder-kernels_1598357182505/work
-testpath==0.4.4
-toml @ file:///tmp/build/80754af9/toml_1592853716807/work
-tornado==6.0.4
-traitlets==4.3.3
-typed-ast==1.4.1
-ujson==1.35
-urllib3 @ file:///tmp/build/80754af9/urllib3_1597086586889/work
-watchdog @ file:///C:/ci/watchdog_1593446204230/work
-wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
-webencodings==0.5.1
-Werkzeug==1.0.1
-win-inet-pton==1.1.0
-wincertstore==0.2
-wrapt==1.11.2
-xlrd==1.2.0
-yapf @ file:///tmp/build/80754af9/yapf_1593528177422/work
-zipp==3.1.0
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: win-64
+alabaster=0.7.12=py36_0
+argh=0.26.2=py36_0
+astroid=2.4.2=py36_0
+atomicwrites=1.4.0=py_0
+attrs=20.1.0=py_0
+autopep8=1.5.4=py_0
+babel=2.8.0=py_0
+backcall=0.2.0=py_0
+bcrypt=3.2.0=py36he774522_0
+blas=1.0=mkl
+bleach=3.1.5=py_0
+brotlipy=0.7.0=py36he774522_1000
+ca-certificates=2020.6.20=hecda079_0
+certifi=2020.6.20=py36hd36e781_2
+cffi=1.14.2=py36h7a1dbc1_0
+chardet=3.0.4=py36_1003
+click=7.1.2=py_0
+cloudpickle=1.5.0=py_0
+colorama=0.4.3=py_0
+cryptography=3.0=py36h7a1dbc1_0
+dash=1.14.0=py_0
+dash-bootstrap-components=0.10.7=pyh9f0ad1d_0
+dash-core-components=1.3.1=py_0
+dash-html-components=1.0.1=py_0
+dash-renderer=1.1.2=py_0
+dash-table=4.4.1=py_0
+decorator=4.4.2=py_0
+defusedxml=0.6.0=py_0
+diff-match-patch=20200713=py_0
+docutils=0.16=py36_1
+entrypoints=0.3=py36_0
+flake8=3.8.3=py_0
+flask=1.1.2=py_0
+flask-compress=1.5.0=py_0
+future=0.18.2=py36_1
+icu=58.2=ha925a31_3
+idna=2.10=py_0
+imagesize=1.2.0=py_0
+importlib-metadata=1.7.0=py36_0
+importlib_metadata=1.7.0=0
+intel-openmp=2020.2=254
+intervaltree=3.1.0=py_0
+ipykernel=5.3.4=py36h5ca1d4c_0
+ipython=7.16.1=py36h5ca1d4c_0
+ipython_genutils=0.2.0=py36_0
+isort=5.4.2=py36_0
+itsdangerous=1.1.0=py36_0
+jedi=0.17.1=py36_0
+jinja2=2.11.2=py_0
+jpeg=9b=hb83a4c4_2
+jsonschema=3.2.0=py36_0
+jupyter_client=6.1.6=py_0
+jupyter_core=4.6.3=py36_0
+keyring=21.3.1=py36_0
+lazy-object-proxy=1.4.3=py36he774522_0
+libpng=1.6.37=h2a8f88b_0
+libsodium=1.0.18=h62dcd97_0
+libspatialindex=1.9.3=h33f27b4_0
+markupsafe=1.1.1=py36he774522_0
+mccabe=0.6.1=py36_1
+mistune=0.8.4=py36he774522_0
+mkl=2020.2=256
+mkl-service=2.3.0=py36hb782905_0
+mkl_fft=1.1.0=py36h45dec08_0
+mkl_random=1.1.1=py36h47e9c7a_0
+nbconvert=5.6.1=py36_0
+nbformat=5.0.7=py_0
+numpy=1.19.1=py36h5510c5b_0
+numpy-base=1.19.1=py36ha3acd2a_0
+numpydoc=1.1.0=py_0
+openssl=1.1.1h=he774522_0
+packaging=20.4=py_0
+pandas=1.1.1=py36ha925a31_0
+pandoc=2.10.1=0
+pandocfilters=1.4.2=py36_1
+paramiko=2.7.1=py_0
+parso=0.7.0=py_0
+pathtools=0.1.2=py_1
+pexpect=4.8.0=py36_0
+pickleshare=0.7.5=py36_0
+pip=20.2.2=py36_0
+plotly=4.9.0=py_0
+pluggy=0.13.1=py36_0
+prompt-toolkit=3.0.6=py_0
+psutil=5.7.2=py36he774522_0
+pycodestyle=2.6.0=py_0
+pycparser=2.20=py_2
+pydocstyle=5.1.0=py_0
+pyflakes=2.2.0=py_0
+pygments=2.6.1=py_0
+pylint=2.6.0=py36_0
+pynacl=1.4.0=py36h62dcd97_1
+pyopenssl=19.1.0=py_1
+pyparsing=2.4.7=py_0
+pyqt=5.9.2=py36h6538335_2
+pyrsistent=0.16.0=py36he774522_0
+pysocks=1.7.1=py36_0
+python=3.6.10=h9f7ef89_2
+python-dateutil=2.8.1=py_0
+python-jsonrpc-server=0.3.4=py_1
+python-language-server=0.34.1=py36_0
+python_abi=3.6=1_cp36m
+pytz=2020.1=py_0
+pywin32=227=py36he774522_1
+pywin32-ctypes=0.2.0=py36_1000
+pyyaml=5.3.1=py36he774522_1
+pyzmq=19.0.1=py36ha925a31_1
+qdarkstyle=2.8.1=py_0
+qt=5.9.7=vc14h73c81de_0
+qtawesome=0.7.2=py_0
+qtconsole=4.7.6=py_0
+qtpy=1.9.0=py_0
+requests=2.24.0=py_0
+retrying=1.3.3=py36_2
+rope=0.17.0=py_0
+rtree=0.9.4=py36h21ff451_1
+setuptools=49.6.0=py36_0
+sip=4.19.8=py36h6538335_0
+six=1.15.0=py_0
+snowballstemmer=2.0.0=py_0
+sortedcontainers=2.2.2=py_0
+sphinx=3.2.1=py_0
+sphinxcontrib-applehelp=1.0.2=py_0
+sphinxcontrib-devhelp=1.0.2=py_0
+sphinxcontrib-htmlhelp=1.0.3=py_0
+sphinxcontrib-jsmath=1.0.1=py_0
+sphinxcontrib-qthelp=1.0.3=py_0
+sphinxcontrib-serializinghtml=1.1.4=py_0
+spyder=4.1.4=py36_0
+spyder-kernels=1.9.3=py36_0
+sqlite=3.33.0=h2a8f88b_0
+testpath=0.4.4=py_0
+toml=0.10.1=py_0
+tornado=6.0.4=py36he774522_1
+traitlets=4.3.3=py36_0
+typed-ast=1.4.1=py36he774522_0
+ujson=1.35=py36hfa6e2cd_0
+urllib3=1.25.10=py_0
+vc=14.1=h0510ff6_4
+vs2015_runtime=14.16.27012=hf0eaf9b_3
+watchdog=0.10.3=py36_0
+wcwidth=0.2.5=py_0
+webencodings=0.5.1=py36_1
+werkzeug=1.0.1=py_0
+wheel=0.35.1=py_0
+win_inet_pton=1.1.0=py36_0
+wincertstore=0.2=py36h7fe50ca_0
+wrapt=1.11.2=py36he774522_0
+xlrd=1.2.0=py36_0
+yaml=0.2.5=he774522_0
+yapf=0.30.0=py_0
+zeromq=4.3.2=ha925a31_2
+zipp=3.1.0=py_0
+zlib=1.2.11=h62dcd97_4
