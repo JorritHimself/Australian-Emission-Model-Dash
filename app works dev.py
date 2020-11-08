@@ -9,7 +9,7 @@
 
 
 ########################
-# Save the environemtn with dbc componenets
+# Reload environemtn with dbc componenets
 ###################
 
 
@@ -21,7 +21,6 @@
 #exec(open('./calcprep.py').read())
 
 # Packages 
-#import os
 import pandas as pd
 import numpy as np
 import re # for some string manipulation with regex
@@ -30,6 +29,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
 
 
@@ -47,11 +47,23 @@ df_nat = df_nat.sort_values(['sectorsorted', 'year'], ascending=[True, True])
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 ### List of starting figures and other output
-fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector")
-fig_added_value_total = px.area(df_nat, x="year", y="ind_val_add_output", color="sector")
+### Work with defined set of colors to keep sector the same color across figures
+# Emissions
+fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector", color_discrete_sequence=['#1F77B4', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#BCBD22', '#17BECF']).update_layout(legend_traceorder="reversed")
+# Added value
+df_nat_val_add = df_nat[df_nat.sector != 'LULUCF']
+df_nat_val_add = df_nat_val_add [df_nat_val_add .sector != 'Residential']
+fig_added_value_total = px.area(df_nat_val_add, x="year", y="ind_val_add_output", color="sector", color_discrete_sequence=['#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#17BECF']).update_layout(legend_traceorder="reversed")
 
 ### Define the app layout
 app.layout = html.Div([
+    dbc.Container([
+        dbc.Row([
+            dbc.Col(html.Div(html.H1('  ANU CCEP Australian emissions trend tool thingy'))),
+            ]),
+        dbc.Row([
+            dbc.Col(html.Div(html.H6('  Introduction: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'))),
+            ]),
         dbc.Row([
             dbc.Col(html.Div(dcc.Graph(id='emissions_total', figure = fig_emissions_total))),
             dbc.Col(html.Div(dcc.Graph(id='value_added_total', figure = fig_added_value_total))),
@@ -59,7 +71,7 @@ app.layout = html.Div([
         dbc.Row([
             dbc.Col(html.Div([
                 html.H6('Agriculture & Forestry emissions trend:'),
-                dcc.Slider(id='agrifor_emis_slider', min=-20, max=20, value=0.34, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                dcc.Slider(id='agrifor_emis_slider', min=-20, max=20, value=0.34, step=0.01, marks={-20: '-20',-10: '-10',0: '0',10: '10',20: '20'}),
                 html.H6('Commercial transport emissions trend:'),
                 dcc.Slider(id='com_transp_emis_slider', min=-20, max=20, value=-0.71, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
                 html.H6('Construction emissions trend:'),
@@ -80,7 +92,8 @@ app.layout = html.Div([
                 dcc.Slider(id='lulucf_emis_slider', min=-20, max=20, value=-10.3, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)})
                 ])),
             ]),
-        ])
+        ], fluid=True, style={"padding": "20px 60px 20px 60px"}) ### This is for padding aroudn the entire app: fill the entire screen, but keep padding top right bottom left at x pixels
+    ])
 
 #### Dynamic output based on user input
 @app.callback(
@@ -96,7 +109,8 @@ app.layout = html.Div([
      Input('services_emis_slider', 'value'),
      Input('lulucf_emis_slider', 'value')]
     )
-def update_figure(agrifor_emis_trend, com_transp_emis_trend, construction_emis_trend, electricty_emis_trend, gas_water_waste_emis_trend, manufacturing_emis_trend, mining_emis_trend, residential_trend, services_trend, lulucf_emis_trend):
+def update_figure(agrifor_emis_trend, com_transp_emis_trend, construction_emis_trend, electricty_emis_trend, 
+                  gas_water_waste_emis_trend, manufacturing_emis_trend, mining_emis_trend, residential_trend, services_trend, lulucf_emis_trend):
     ### Emissions output per sector: emissions levels at last observation, minus number of years since final observation *annual emission reductions. 
     ### Second line with each sector is so they cannot go negative. Exception is LULUCF, this can go negative
     ### Agriculture & forestry emmissions:
@@ -131,18 +145,20 @@ def update_figure(agrifor_emis_trend, com_transp_emis_trend, construction_emis_t
     df_nat.loc[(df_nat['sector']=='LULUCF') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+lulucf_emis_trend*df_nat['yrs_since_final_obs']
     
     
-    ### Redefineemissions total figure again, with dynamic input
-    fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector")
-    fig_emissions_total.update_layout(transition_duration=500)
+    ### Redefine emissions total figure again, with dynamic input
+    fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector", color_discrete_sequence=['#1F77B4', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#BCBD22', '#17BECF'])
+    fig_emissions_total.update_layout(transition_duration=500, legend_traceorder="reversed")
     return fig_emissions_total
-    ### Redefine figures again, but with dynamic input
-    fig_added_value_total = px.area(df_nat, x="year", y="ind_val_add_output", color="sector")
-    fig_added_value_total.update_layout(transition_duration=500)
+    ### Redefine value added figure again, but with dynamic input
+    df_nat_val_add = df_nat[df_nat.sector != 'LULUCF']
+    df_nat_val_add = df_nat_val_add [df_nat_val_add .sector != 'Residential']
+    fig_added_value_total = px.area(df_nat_val_add, x="year", y="ind_val_add_output", color="sector", color_discrete_sequence=['#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#17BECF'])
+    fig_added_value_total.update_layout(transition_duration=500, legend_traceorder="reversed")
     return fig_added_value_total
 
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
     
     
