@@ -2,14 +2,14 @@
 # Column with baseline leves for all the above (1990 or 2005 levels)
 # column with annual perc growth form sliders
 # column with annual perc rgowth from slider to the power of years since 2008 or 2009
-# Trends: per capita residential emissions 2008-2017
-# Trends: per capita total emissions 2008-2017
+# Trends: per capita residential emissions 2008_2017
+# Trends: per capita total emissions 2008_2017
 
 #### Added value only has data from 2008 onwards? Can we fix this, or do we censor?
 
 
 ########################
-# Save the environemtn with dbc componenets
+# Reload environemtn with dbc componenets
 ###################
 
 
@@ -21,7 +21,6 @@
 #exec(open('./calcprep.py').read())
 
 # Packages 
-#import os
 import pandas as pd
 import numpy as np
 import re # for some string manipulation with regex
@@ -47,58 +46,110 @@ df_nat = df_nat.sort_values(['sectorsorted', 'year'], ascending=[True, True])
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 ### List of starting figures and other output
-fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector")
-fig_added_value_total = px.area(df_nat, x="year", y="ind_val_add_output", color="sector")
+### Work with defined set of colors to keep sector the same color across figures
+# Emissions
+fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector", color_discrete_sequence=['#1F77B4', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#BCBD22', '#17BECF'])
+# Added value
+df_nat_val_add = df_nat[df_nat.sector != 'LULUCF']
+df_nat_val_add = df_nat_val_add [df_nat_val_add .sector != 'Residential']
+fig_added_value_total = px.area(df_nat_val_add, x="year", y="ind_val_add_output", color="sector", color_discrete_sequence=['#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#17BECF'])
 
 ### Define the app layout
 app.layout = html.Div([
         dbc.Row([
-            dbc.Col(html.Div(dcc.Graph(id='emissions-total', figure = fig_emissions_total))),
-            dbc.Col(html.Div(dcc.Graph(id='value-added-total', figure = fig_added_value_total))),
+            dbc.Col(html.Div(dcc.Graph(id='emissions_total', figure = fig_emissions_total))),
+            dbc.Col(html.Div(dcc.Graph(id='value_added_total', figure = fig_added_value_total))),
             ]),
         dbc.Row([
             dbc.Col(html.Div([
                 html.H6('Agriculture & Forestry emissions trend:'),
-                dcc.Slider(id='agrifor-emis-slider', min=-20, max=20, value=0.54, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                dcc.Slider(id='agrifor_emis_slider', min=-20, max=20, value=0.34, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Commercial transport emissions trend:'),
+                dcc.Slider(id='com_transp_emis_slider', min=-20, max=20, value=-0.71, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Construction emissions trend:'),
+                dcc.Slider(id='construction_emis_slider', min=-20, max=20, value=--0.14, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
                 html.H6('Electricity generation emissions trend:'),
-                dcc.Slider(id='elec-emis-slider', min=-20, max=20, value=-1.96, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                dcc.Slider(id='electricity_emis_slider', min=-20, max=20, value=1.80, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Gas, water & waste services emissions trend:'),
+                dcc.Slider(id='gas_water_waste_emis_slider', min=-20, max=20, value=0.31, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Manufacturing emissions trend:'),
+                dcc.Slider(id='manufacturing_emis_slider', min=-20, max=20, value=1.83, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Mining emissions trend:'),
+                dcc.Slider(id='mining_emis_slider', min=-20, max=20, value=-2.90, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Residential emissions trend:'),
+                dcc.Slider(id='residential_emis_slider', min=-20, max=20, value=-0.70, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
+                html.H6('Services emissions trend:'),
+                dcc.Slider(id='services_emis_slider', min=-20, max=20, value=-0.32, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)}),
                 html.H6('LULUCF emissions trend:'),
-                dcc.Slider(id='lulucf-emis-slider', min=-20, max=20, value=-12.2, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)})
+                dcc.Slider(id='lulucf_emis_slider', min=-20, max=20, value=-10.3, step=0.01, marks={i: '{}'.format(i) for i in range(-20, 20)})
                 ])),
             ]),
         ])
 
-
-
 #### Dynamic output based on user input
 @app.callback(
-    Output('emissions-total', 'figure'),
-    [Input('agrifor-emis-slider', 'value'),
-     Input('elec-emis-slider', 'value'),
-     Input('lulucf-emis-slider', 'value')]
+    Output('emissions_total', 'figure'),
+    [Input('agrifor_emis_slider', 'value'),
+     Input('com_transp_emis_slider', 'value'),
+     Input('construction_emis_slider', 'value'),
+     Input('electricity_emis_slider', 'value'),
+     Input('gas_water_waste_emis_slider', 'value'),
+     Input('manufacturing_emis_slider', 'value'),
+     Input('mining_emis_slider', 'value'),
+     Input('residential_emis_slider', 'value'),
+     Input('services_emis_slider', 'value'),
+     Input('lulucf_emis_slider', 'value')]
     )
-def update_figure(agrifor_emis_trend, elec_emis_trend, lulucf_emis_trend):
-    ### Emissions output agriculutre: emissions levels at last observation, minus number of years since final observation *annual emission reductions. Second line si so they cannot go negative
+def update_figure(agrifor_emis_trend, com_transp_emis_trend, construction_emis_trend, electricty_emis_trend, 
+                  gas_water_waste_emis_trend, manufacturing_emis_trend, mining_emis_trend, residential_trend, services_trend, lulucf_emis_trend):
+    ### Emissions output per sector: emissions levels at last observation, minus number of years since final observation *annual emission reductions. 
+    ### Second line with each sector is so they cannot go negative. Exception is LULUCF, this can go negative
+    ### Agriculture & forestry emmissions:
     df_nat.loc[(df_nat['sector']=='Agriculture & Forestry') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+agrifor_emis_trend*df_nat['yrs_since_final_obs']
     df_nat.loc[(df_nat['sector']=='Agriculture & Forestry') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
-    ### Emissions output electricity: emissions levels at last observation, minus number of years since final observation *annual emission reductions. Second line si so they cannot go negative
-    df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+elec_emis_trend*df_nat['yrs_since_final_obs']
+    ### Commercial Transport emmissions:
+    df_nat.loc[(df_nat['sector']=='Commercial Transport') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+com_transp_emis_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Commercial Transport') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### Construction emmissions:
+    df_nat.loc[(df_nat['sector']=='Construction') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+construction_emis_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Construction') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### Electricity emmissions:
+    df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+electricty_emis_trend*df_nat['yrs_since_final_obs']
     df_nat.loc[(df_nat['sector']=='Electricity generation') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
-    ### Emissions output LULUCF: emissions levels at last observation, minus number of years since final observation *annual emission reductions
+    ### Gas, Water & Waste Services emissions:
+    df_nat.loc[(df_nat['sector']=='Gas, Water & Waste Services') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+gas_water_waste_emis_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Gas, Water & Waste Services') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### Manufacturing emmissions:
+    df_nat.loc[(df_nat['sector']=='Manufacturing') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+manufacturing_emis_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Manufacturing') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### Mining emmissions:
+    df_nat.loc[(df_nat['sector']=='Mining') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+mining_emis_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Mining') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### Residential emmissions:
+    df_nat.loc[(df_nat['sector']=='Residential') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+residential_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Residential') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### Services emmissions:
+    df_nat.loc[(df_nat['sector']=='Services') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+services_trend*df_nat['yrs_since_final_obs']
+    df_nat.loc[(df_nat['sector']=='Services') & (df_nat['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
+    ### LULUCF emissions: 
+    ### Note again thes emay go negative
     df_nat.loc[(df_nat['sector']=='LULUCF') & (df_nat['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_nat['emissions_MtCo2_finaly']+lulucf_emis_trend*df_nat['yrs_since_final_obs']
     
     
-    
-    
-    ### Redefine figure again, but with dynamic input
-    fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector")
+    ### Redefine emissions total figure again, with dynamic input
+    fig_emissions_total = px.area(df_nat, x="year", y="emissions_MtCo2_output", color="sector", color_discrete_sequence=['#1F77B4', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#BCBD22', '#17BECF'])
     fig_emissions_total.update_layout(transition_duration=500)
-
     return fig_emissions_total
+    ### Redefine value added figure again, but with dynamic input
+    df_nat_val_add = df_nat[df_nat.sector != 'LULUCF']
+    df_nat_val_add = df_nat_val_add [df_nat_val_add .sector != 'Residential']
+    fig_added_value_total = px.area(df_nat_val_add, x="year", y="ind_val_add_output", color="sector", color_discrete_sequence=['#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B', '#E377C2', '#7F7F7F', '#17BECF'])
+    fig_added_value_total.update_layout(transition_duration=500)
+    return fig_added_value_total
 
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
     
     
