@@ -1,0 +1,39 @@
+### Create a virtual environemtn with the correct version of python
+### From dashboard go to consoles, start a bash console
+mkvirtualenv dashappenv --python=/usr/bin/python3.6
+# Make sure environment created above is active
+workon myvirtualenv
+### Install packages in Bash
+pip install pandas
+pip install dash
+pip install dash-bootstrap-components
+
+# Alternatively:
+pip install -r requirements3.6.txt
+
+# Or alternatively:
+python3.6 -m pip install pandas --user
+python3.6 -m pip install dash --user
+python3.6 -m pip install dash-bootstrap-components --user
+
+### Create the website
+### From dashboard go to Web, add a new app
+# For Dash, pick Flask, Python 3.6 (for the current app at least)
+
+### Edit the WSIG file
+### From dashboard go to Web, scroll to WSGI 
+### Copy paste the WSGI configuratin file in this folder
+### But make sure the project home path is edited to match the account
+
+
+## Also Make sure virtualenv, site and working directory are set properly in the web app page
+## And make sure python 3.6 is selected 
+### AGAIN, make sure the workng directory is correct. /mysite The thing chnages it sometimes
+
+## Put CCS in the static file sif you must
+
+### To delete virtual env
+rm -rf /home/JorritHimself/.virtualenvs/dashappenv
+
+
+home/ccepanu/.virtualenvs/dashappenv

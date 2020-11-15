@@ -17,7 +17,7 @@ import re # for some string manipulation with regex
 
 # @@ Set first and last years of data here
 firstyearnat = 2008
-lastyearnat = 2017
+lastyearnat = 2018
 firstyearstate = 2009
 lastyearstate = 2018
 
@@ -73,12 +73,12 @@ df_trend = df_trend[['geo', 'sector', 'emissions_MtCo2_finaly', 'ind_val_add_201
 ### Base year and base-year emissions
 df_baseyear = df_nat
 df_baseyear['tokeep'] = 0
-base1990 = ['ACT', 'SA', 'TAS']
-base2005 = ['National', 'NSW', 'NT', 'QLD', 'VIC', 'WA']
+### base1990 = ['ACT', 'SA', 'TAS']
+base2005 = ['National', 'ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA']
 # Keep base year only
 # Flag the base year rows
-for state in base1990:
-    df_baseyear.loc[(df_baseyear['geo']==state) & (df_baseyear['year']== 1990), 'tokeep'] = 1
+###for state in base1990:
+###    df_baseyear.loc[(df_baseyear['geo']==state) & (df_baseyear['year']== 1990), 'tokeep'] = 1
 for state in base2005:
     df_baseyear.loc[(df_baseyear['geo']==state) & (df_baseyear['year']== 2005), 'tokeep'] = 1
 # Keep only the dtaa for the baseyears
@@ -96,7 +96,7 @@ full_df.drop(columns=['tokeep'])
 full_df.loc[full_df['geo']== 'National', 'yrs_since_final_obs'] = full_df['year']-lastyearnat
 full_df.loc[full_df['geo']!= 'National', 'yrs_since_final_obs'] = full_df['year']-lastyearstate
 ### Housekeeping
-del base1990, base2005, df_baseyear, df_firsty, df_lasty, df_trend, state, firstyearnat, firstyearstate, lastyearnat, lastyearstate, df_nat
+del base2005, df_baseyear, df_firsty, df_lasty, df_trend, state, firstyearnat, firstyearstate, lastyearnat, lastyearstate, df_nat
 
 ### Calculate output numbers
 #!!! Note this is just for baseline graphs. User input from sliders should do all these calculations again 
@@ -119,26 +119,26 @@ full_df['emissions_MtCo2_output']=full_df['emissions_MtCo2_finaly']+full_df['emi
 # But keep original input for years where we have data
 full_df.loc[(full_df['yrs_since_final_obs']<=0), 'emissions_MtCo2_output'] = full_df['emissions_MtCo2_inp']
 
+### Emissions intensity output: forget input just calculate
+full_df['emis_int_outp']=full_df['emissions_MtCo2_output']/full_df['ind_val_add_output']
+
+### Carbon intensity of electricity generation output: forget input just calculate
+full_df['elec_carb_int_outp']=1000*full_df['emissions_MtCo2_output']/full_df['elec_gen_GWh_output']
+
+# But keep original input for years where we have data
+full_df.loc[(full_df['yrs_since_final_obs']<=0), 'emissions_MtCo2_output'] = full_df['emissions_MtCo2_inp']
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### Export to csv to use to use in dash app
-full_df.to_csv('./db/preppeddata.csv', index=False)  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+full_df.to_csv('./db/preppeddata.csv', index=False) 
