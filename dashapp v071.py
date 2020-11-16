@@ -1,20 +1,12 @@
 ### ToDo: 
 # Column with baseline leves for all the above
-# column with annual perc growth form sliders
-# column with annual perc rgowth from slider to the power of years since 2008 or 2009
-# Trends: per capita residential emissions 2008_2017
-# Trends: per capita total emissions 2008_2017
-# Reload environemtn with dbc componenets
-# tabbed in a loop
-# extra tabs woth method etc
-# white backgroudn theme
-# beter colours wihtout the line
-## Add title and change labels: https://plotly.com/python/figure-labels/
-# Add scenarios
-# Better slider
+# column with annual perc growth form pickers
+# column with annual perc rgowth from picker to the power of years since 2008 or 2009
 # Smaller everything
 # Create separate emis and va df
 # Add calculations as in excel scenario sheet
+# LULUCF to brown
+# 2030 rates
 ###################
 
 # Packages 
@@ -31,13 +23,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-
-
-
 ### Import the prepped input data
 df_full = pd.read_csv('./db/preppeddata.csv')
-### Import the slider settings 
-df_slider_in = pd.read_excel('./db/sliderslist.xlsx', sheet_name="slidersettings") 
+### Import the picker settings 
+df_picker_in = pd.read_excel('./db/inputpickerlist.xlsx', sheet_name="pickersettings") 
 
 # get good sort, with LULUCF as first one, then others on top
 df_full['sectorsorted']=df_full['sector']
@@ -48,13 +37,25 @@ df_full = df_full.sort_values(['sectorsorted', 'year'], ascending=[True, True])
 
 # Define list of states
 statelist = ['National' , 'ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA']
-# Define list of slider names: this will be used in a loop to create a dictionary of vlues to set slidersettinsg for each state
-sliderlist = ['services_emis_slider','mining_emis_slider','manufacturing_emis_slider','gas_water_waste_emis_slider','construction_emis_slider',
-'com_transp_emis_slider','agrifor_emis_slider','lulucf_emis_slider','electricity_emis_slider','residential_emis_slider',
-'services_valadd_slider','mining_valadd_slider','manufacturing_valadd_slider','gas_water_waste_valadd_slider',
-'construction_valadd_slider','com_transp_valadd_slider','agrifor_valadd_slider','electricity_growth_slider']
-# Define list of slider settings: this will be used in a loop to create a dictionary of vlues to set slidersettinsg for each state
-slidersettinglist = ['min', 'max','value', 'steps', 'marks']
+# Define list of picker names: this will be used in a loop to create a dictionary of vlues to set pickersettinsg for each state
+pickerlist = ['services_emis_picker','mining_emis_picker','manufacturing_emis_picker','gas_water_waste_emis_picker','construction_emis_picker',
+'com_transp_emis_picker','agrifor_emis_picker','lulucf_emis_picker','electricity_emis_picker','residential_emis_picker',
+'services_valadd_picker','mining_valadd_picker','manufacturing_valadd_picker','gas_water_waste_valadd_picker',
+'construction_valadd_picker','com_transp_valadd_picker','agrifor_valadd_picker','electricity_growth_picker']
+# Define list of picker settings: this will be used in a loop to create a dictionary of vlues to set pickersettinsg for each state
+pickersettinglist = ['min', 'max','value', 'steps', 'marks']
+
+# Define list of colors for the sectors
+my_discrete_color_map={"LULUCF": '#8C564B',
+                    "Residential": '#FF7F0E',
+                    "Electricity generation":'#D62728',
+                    "Agriculture & Forestry":'#2CA02C',
+                    "Commercial Transport": '#9467BD',
+                    "Construction": '#1F77B4',
+                    "Gas, Water & Waste Services":'#E377C2',
+                    "Manufacturing":'#BCBD22', 
+                    "Mining":'#7F7F7F', 
+                    "Services": '#17BECF'}
 
 ### Get national values: these are use to create the figures for when the user lands on the page and hasnt selected a tab yet
 df_select = df_full[(df_full['geo']=='National') & (df_full['year']>=2005) & (df_full['sector']!="Overall")]
@@ -62,16 +63,17 @@ df_select = df_full[(df_full['geo']=='National') & (df_full['year']>=2005) & (df
 ### Work with defined set of colors to keep sector the same color across figures
 ## Emissions figure
 fig_emissions_total = px.area(df_select, x="year", y="emissions_MtCo2_output", color="sector", 
-                              color_discrete_sequence=['#1F77B4', '#FF7F0E', '#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
+                              color_discrete_map=my_discrete_color_map,
                               labels={"year": "", "emissions_MtCo2_output": "CO<sub>2</sub> Emissions (Mt CO<sub>2</sub>-eq/y)"},
-                              title="CO<sub>2</sub>-emissions by industry")
+                              title="CO<sub>2</sub>-emissions by industry",
+                              width=800, height=375)
 fig_emissions_total.update_layout(template="plotly_white",
                                     legend_traceorder="reversed",
                                     title_font_color="#1F77B4",
                                     title_font_size=18,
                                     title_font_family="Rockwell",
                                     title_x = 0.02,
-                                    margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                    margin=dict(t=40, r=0, b=0, l=65, pad=0))
 fig_emissions_total.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 fig_emissions_total.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 
@@ -80,16 +82,17 @@ df_select = df_full[(df_full['geo']=='National') & (df_full['year']>=2009) & (df
 df_select_val_add = df_select[df_select.sector != 'LULUCF']
 df_select_val_add = df_select_val_add [df_select_val_add.sector != 'Residential']
 fig_added_value_total = px.area(df_select_val_add, x="year", y="ind_val_add_output", color="sector",
-                                color_discrete_sequence=['#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
+                                color_discrete_map=my_discrete_color_map,
                                 labels={"year": "", "ind_val_add_output": "Value added (billion 2019 AUD)<sub> </sub>"},
-                                title="Value added by industry")
+                                title="Value added by industry",
+                                width=800, height=375)
 fig_added_value_total.update_layout(template="plotly_white",
                                     legend_traceorder="reversed",
                                     title_font_color="#1F77B4",
                                     title_font_size=18,
                                     title_font_family="Rockwell",
                                     title_x = 0.02,
-                                    margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                    margin=dict(t=40, r=0, b=0, l=65, pad=0))
 fig_added_value_total.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 fig_added_value_total.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 
@@ -98,16 +101,17 @@ df_select = df_full[(df_full['geo']=='National') & (df_full['year']>=2009) & (df
 df_select_emis_int = df_select[df_select.sector != 'LULUCF']
 df_select_emis_int = df_select_emis_int[df_select_emis_int.sector != 'Residential']
 fig_emis_int = px.line(df_select_emis_int, x="year", y="emis_int_outp", color="sector",
-                                color_discrete_sequence=['#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
-                                labels={"year": "", "emis_int_outp": "Emission intensity (kg CO<sub>2</sub>-eq/2019 AUD)"},
-                                title="Emission intensity by industry")
+                       color_discrete_sequence=['#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
+                       labels={"year": "", "emis_int_outp": "Emission intensity (kg CO<sub>2</sub>-eq/2019 AUD)"},
+                       title="Emission intensity by industry",
+                       width=800, height=375)
 fig_emis_int.update_layout(template="plotly_white",
                                     legend_traceorder="reversed",
                                     title_font_color="#1F77B4",
                                     title_font_size=18,
                                     title_font_family="Rockwell",
                                     title_x = 0.02,
-                                    margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                    margin=dict(t=40, r=0, b=0, l=65, pad=0))
 fig_emis_int.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 fig_emis_int.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 
@@ -129,7 +133,8 @@ fig_elec_gen_int.update_layout(template="plotly_white",
                                     title_font_size=18,
                                     title_font_family="Rockwell",
                                     title_x = 0.02,
-                                    margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                    margin=dict(t=40, r=0, b=0, l=65, pad=0),
+                                    width=800, height=375)
 fig_elec_gen_int.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 fig_elec_gen_int.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
 # Set y-axes titles
@@ -137,32 +142,79 @@ fig_elec_gen_int.update_yaxes(title_text="Electricity generation (GWh)<sub> </su
 fig_elec_gen_int.update_yaxes(title_text="Carbon intensity (kg CO<sub>2</sub>-eq/kWh)", secondary_y=True)
 
 
+
+
+
+
+#######################  HTML divs styles for the overall layout  ######################
+
+# the style arguments for the header. 
+my_header_style = {
+    "padding": "0 10% 0 10%",
+    "width": "100%",
+    "background-color": "#f8f9fa",
+}
+# the style arguments for the header. 
+my_tablist_style = {
+    "position": "sticky",
+    "top": 0,
+    "padding": "0 10% 0 10%",
+    "width": "100%",
+    "background-color": "#f8f9fa",
+    'zIndex': 9999
+    }
+# the style arguments for the sidebar. Sticky on top: scrolls untill 50px from top
+my_sidebar_style = {
+    "position": "sticky",
+    "top": 65,
+    "left": "10%",
+    "width": "45%",
+    "background-color": "#f8f9fa",
+}
+# the styles for the main content position it to the right of the sidebar and
+# add some padding.
+my_content_style = {
+    "position": "relative",
+    "top": -550,
+    "margin-left": "53%",
+}
+
+
+
+
+
+
+
+
 ### Define the app
 # Note an additional stylesheet is loaded locally, see assets/bootstrap_modified.css
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__)
 
-### Define the app layout with tabs: content 'tabslist-content' is generated based on the tab selection
-app.layout = html.Div(style={'backgroundColor': 'rgba(242, 241, 239, 1)'}, children=[ ### backgroundColor here is for the whole webpage
+
+header  = html.Div(style=my_header_style, children=[ ### backgroundColor here is for the whole webpage
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.Div(html.H1('  ANU CCEP Australian emissions trend tool thingy'))),
+            html.Div(html.H1('2050 emissions pathway tool for')),
             ],style={"color": "#1F77B4"}),
         dbc.Row([
-            html.Div(html.H4('How to use this tool. NB This text needs updating:')),
+            html.Div(html.H1('Australia and Australian States and Territories')),
+            ],style={"color": "#1F77B4"}),
+        dbc.Row([
+            html.Div(html.H3('V0.71: this tool is still under development')),
+            ],style={"color": "#D62701", }),
+        dbc.Row([
+            html.Div(html.H4('This tool compiles data from Australia’s emissions inventories, economics statistics and some other sources, and allows the creation of pathways to low-emissions and net zero outcomes.')),
             ]),
         dbc.Row([
-            html.Div(html.H4('1. Use the "Scenario Input" sliders to adjust: (i) 2018-2050 average growth in economic output for each industry (+ growth in electricity generation), & (ii) 2018-2050 average annual industry emissions reductions. The default inputs are historical 2008-2017 data. Hence, the default outputs represent a continuation of 2008-2017 trends across the 2018-2050 period.')),
+            html.Div(html.H4('It allows users to input their own assumptions about future rates of change of economic activity and emissions intensity by sector, for Australia as a whole and for each State and Territory.')),
             ]),
         dbc.Row([
-            html.Div(html.H4('2. Review your Scenario in the Output cells and the 7 graphs. Historical data is provided in Column M to compare the 2020-2030 "decarbonisation effort" that your scenario involves. If the values for 2020-2030 are more negative than 2008-2017, then the decarbonisation effort in your scenario is greater than historical data. Note that higher industry output growth for a given annual emissions reduction will increase decarbonisation effort & vice versa. See the Glossary for variable definitions. ')),
+            html.Div(html.H4('Brief instructions: (Instructions to users to come)')),
             ]),
-        dbc.Row([
-            html.Div(html.H4('3. Select a Reference Scenario and compare your 2050 Emissions Reductions and Negative Emissions to reference values in Column K. Compare your Scenario to other Reference Scenarios & consider adjusting your Scenario Inputs accordingly. You may want to consider different ways to meet a Net-Zero 2050 Emissions Target.')),
-            ]),
-        dbc.Row([
-            html.Div(html.H4('"4. Finalise your Scenario. You can name your Scenario and include your name in the cells provided. If you would like to make another Scenario, you can ""Save As"" the excel workbook with your scenario name and start again with the original file. Happy 2050 emissions pathway scenario building!!"')),
-            ]),
-        ], fluid=True, style={"padding": "20px 200px 20px 200px"}), ### padding around the title and intro
+        ], fluid=True), ### padding around the title and intro
+    ])
+
+tabheader = html.Div(style=my_tablist_style, children=[ ### backgroundColor here is for the whole webpage
     dbc.Container([
         dcc.Tabs(id='tabslist', value='National', children=[
             dcc.Tab(label='Australia', value='National'),
@@ -174,138 +226,170 @@ app.layout = html.Div(style={'backgroundColor': 'rgba(242, 241, 239, 1)'}, child
             dcc.Tab(label='TAS', value='TAS'),
             dcc.Tab(label='VIC', value='VIC'),
             dcc.Tab(label='WA', value='WA'),
-            dcc.Tab(label='Documentation', value='docs'),
+            dcc.Tab(label='About', value='about'),
             dcc.Tab(label='Reports', value='other')
-            ])
-        ], fluid=True, style={"padding": "0px 130px 0px 130px", "position": "sticky", "top": 0, 'zIndex': 9999}), ### padding around the tabs box. Sticky and zIndex make it float on top of the other stuff. Keep padding top at 0 because otherwise the other stuff will be visible again 
+            ]),
+        ], fluid=True), 
+    ])
+
+sidebar  = html.Div(style=my_sidebar_style, children=[
     dbc.Container([
-        html.Div(id='tabslist-content')
-        ], fluid=True, style={"padding": "0px 60px 10px 60px"}) ### padding around the entire app
+        html.Div(id='tabslist-sidebar')
+        ], fluid=True),
     ])
 
 
-dict_of_fig = dict({
-    "data": [{"type": "bar",
-              "x": [1, 2, 3],
-              "y": [1, 3, 2]}],
-    "layout": {"title": {"text": "A Figure Specified By A Graph Object With A Dictionary"}}
-})
+content  = html.Div(style=my_content_style, children=[
+    dbc.Container([
+        html.Div(id='tabslist-content')
+        ], fluid=True),
+    ])
 
 
+
+# https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
+
+
+### Define the app layout with tabs: content 'tabslist-content' is generated based on the tab selection
+#app.layout = html.Div([dcc.Location(id="url"), header, sidebar, content])
+
+app.layout = html.Div([header, tabheader, sidebar, content], style ={"background-color": "#f8f9fa"})
+    
+        
 ### Define app content based on tab choice. 
-### The slider value selection is a separate callback, below this block
-@app.callback(Output('tabslist-content', 'children'),
+### The picker value selection is a separate callback, below this block
+@app.callback(Output('tabslist-sidebar', 'children'),
               [Input('tabslist', 'value')])
-def render_content(tab):
+def render_sidebar(tab):
     if tab in statelist:
-        ## Loop to get the right slider settings for each state and type of slider
-        df_sliderselect = df_slider_in[(df_slider_in['geo']==tab)]
-        df_sliderselect = df_sliderselect.set_index('slider')
-        slidersetting_dict = {}
-        for slidername in sliderlist:
-            for slidersetting in slidersettinglist:
-                slidersetting_dict[slidername + '_' + slidersetting] = df_sliderselect._get_value(slidername, slidersetting)
+        ## Loop to get the right picker settings for each state and type of picker
+        df_pickerselect = df_picker_in[(df_picker_in['geo']==tab)]
+        df_pickerselect = df_pickerselect.set_index('picker')
+        pickersetting_dict = {}
+        for pickername in pickerlist:
+            for pickersetting in pickersettinglist:
+                pickersetting_dict[pickername + '_' + pickersetting] = df_pickerselect._get_value(pickername, pickersetting)
         return html.Div([
             dbc.Container([
                 dbc.Row([
                     dbc.Col((html.Div(html.H4('Sector'))), width=2),
-                    dbc.Col((html.Div(html.H4('Annaul industry emission reduction'))), width=2),
-                    dbc.Col((html.Div(html.H4('Industry gross added value growth'))), width=2),
+                    dbc.Col((html.Div(html.H4('Annaul change in emissions by sector'))), width=5),
+                    dbc.Col((html.Div(html.H4('Industry gross added value growth'))), width=5),
                     ]),
                 dbc.Row([
+                    dbc.Col((html.Div(html.H5(''))), width=3),
+                    dbc.Col((html.Div(html.H5('(Mt CO2-eq per year)'))), width=5),
+                    dbc.Col((html.Div(html.H5('(% annual change in 2019 AUD)'))), width=4),
+                    ]),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H5(''))), width=3),
+                    dbc.Col((html.Div(html.H5('10yr trend'))), width=1),
+                    dbc.Col((html.Div(html.H5('2020 to 2030'))), width=2),
+                    dbc.Col((html.Div(html.H5('2030 to 2050'))), width=2),
+                    dbc.Col((html.Div(html.H5('10yr trend'))), width=2),
+                    dbc.Col((html.Div(html.H5('2020 to 2050'))), width=2),
+                    ]),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('Services'))), width=3),
+                    dbc.Col((html.Div(html.H4(pickersetting_dict['services_emis_picker_value']))), width=1),
+                    dbc.Col((html.Div(dbc.Input(id='services_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['services_emis_picker_value'], step=pickersetting_dict['services_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='services_emis_picker3050', type="number", bs_size="sm", value=pickersetting_dict['services_emis_picker_value'], step=pickersetting_dict['services_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H4(pickersetting_dict['services_valadd_picker_value']))), width=1, style={'text-align': 'center'}),
+                    dbc.Col((html.Div(dbc.Input(id='services_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['services_valadd_picker_value'], step=pickersetting_dict['services_valadd_picker_steps']))), width=2),
+                    ],style={"background-color": "rgba(23,190,207,0.6)"}),     
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('Mining'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='mining_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['mining_emis_picker_value'], step=pickersetting_dict['mining_emis_picker_steps']))), width=2),
                     dbc.Col((html.Div(html.H5(''))), width=2),
-                    dbc.Col((html.Div(html.H5('(Mt CO2-eq per year)'))), width=2),
-                    dbc.Col((html.Div(html.H5('(% annual change in 2019 AUD)'))), width=2),
-                    ]),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Services'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='services_emis_slider', min=slidersetting_dict['services_emis_slider_min'], max=slidersetting_dict['services_emis_slider_max'], value=slidersetting_dict['services_emis_slider_value'], step=slidersetting_dict['services_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['services_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='services_valadd_slider', min=slidersetting_dict['services_valadd_slider_min'], max=slidersetting_dict['services_valadd_slider_max'], value=slidersetting_dict['services_valadd_slider_value'], step=slidersetting_dict['services_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['services_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(23,190,207,0.8)"}),     
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Mining'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='mining_emis_slider', min=slidersetting_dict['mining_emis_slider_min'], max=slidersetting_dict['mining_emis_slider_max'], value=slidersetting_dict['mining_emis_slider_value'], step=slidersetting_dict['mining_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['mining_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='mining_valadd_slider', min=slidersetting_dict['mining_valadd_slider_min'], max=slidersetting_dict['mining_valadd_slider_max'], value=slidersetting_dict['mining_valadd_slider_value'], step=slidersetting_dict['mining_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['mining_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(127,127,127,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Manufacturing'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='manufacturing_emis_slider', min=slidersetting_dict['manufacturing_emis_slider_min'], max=slidersetting_dict['manufacturing_emis_slider_max'], value=slidersetting_dict['manufacturing_emis_slider_value'], step=slidersetting_dict['manufacturing_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['manufacturing_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='manufacturing_valadd_slider', min=slidersetting_dict['manufacturing_valadd_slider_min'], max=slidersetting_dict['manufacturing_valadd_slider_max'], value=slidersetting_dict['manufacturing_valadd_slider_value'], step=slidersetting_dict['manufacturing_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['manufacturing_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(188,189,34,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Gas, water & waste services'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='gas_water_waste_emis_slider', min=slidersetting_dict['gas_water_waste_emis_slider_min'], max=slidersetting_dict['gas_water_waste_emis_slider_max'], value=slidersetting_dict['gas_water_waste_emis_slider_value'], step=slidersetting_dict['gas_water_waste_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['gas_water_waste_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='gas_water_waste_valadd_slider', min=slidersetting_dict['gas_water_waste_valadd_slider_min'], max=slidersetting_dict['gas_water_waste_valadd_slider_max'], value=slidersetting_dict['gas_water_waste_valadd_slider_value'], step=slidersetting_dict['gas_water_waste_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['gas_water_waste_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(227,119,194,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Construction'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='construction_emis_slider', min=slidersetting_dict['construction_emis_slider_min'], max=slidersetting_dict['construction_emis_slider_max'], value=slidersetting_dict['construction_emis_slider_value'], step=slidersetting_dict['construction_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['construction_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='construction_valadd_slider', min=slidersetting_dict['construction_valadd_slider_min'], max=slidersetting_dict['construction_valadd_slider_max'], value=slidersetting_dict['construction_valadd_slider_value'], step=slidersetting_dict['construction_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['construction_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(140,86,75,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Commercial transport'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='com_transp_emis_slider', min=slidersetting_dict['com_transp_emis_slider_min'], max=slidersetting_dict['com_transp_emis_slider_max'], value=slidersetting_dict['com_transp_emis_slider_value'], step=slidersetting_dict['com_transp_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['com_transp_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='com_transp_valadd_slider', min=slidersetting_dict['com_transp_valadd_slider_min'], max=slidersetting_dict['com_transp_valadd_slider_max'], value=slidersetting_dict['com_transp_valadd_slider_value'], step=slidersetting_dict['com_transp_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['com_transp_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(148,103,189,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Agriculture & Forestry'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='agrifor_emis_slider', min=slidersetting_dict['agrifor_emis_slider_min'], max=slidersetting_dict['agrifor_emis_slider_max'], value=slidersetting_dict['agrifor_emis_slider_value'], step=slidersetting_dict['agrifor_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['agrifor_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='agrifor_valadd_slider', min=slidersetting_dict['agrifor_valadd_slider_min'], max=slidersetting_dict['agrifor_valadd_slider_max'], value=slidersetting_dict['agrifor_valadd_slider_value'], step=slidersetting_dict['agrifor_valadd_slider_steps'], marks=ast.literal_eval(slidersetting_dict['agrifor_valadd_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(44,160,44,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('LULUCF'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='lulucf_emis_slider', min=slidersetting_dict['lulucf_emis_slider_min'], max=slidersetting_dict['lulucf_emis_slider_max'], value=slidersetting_dict['lulucf_emis_slider_value'], step=slidersetting_dict['lulucf_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['lulucf_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(html.H4(''))), width=2),
-					],style={"background-color": "rgba(31,119,180,0.8)"}),
-                dbc.Row([
-                    dbc.Col((html.Div(html.H4('Sector'))), width=2),
-                    dbc.Col((html.Div(html.H4('Annaul industry emission reduction'))), width=2),
-                    dbc.Col((html.Div(html.H4('Electricity generation growth'))), width=2),
-                    ]),
-                dbc.Row([
+                    dbc.Col((html.Div(dbc.Input(id='mining_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['mining_valadd_picker_value'], step=pickersetting_dict['mining_valadd_picker_steps']))), width=2),
                     dbc.Col((html.Div(html.H5(''))), width=2),
-                    dbc.Col((html.Div(html.H5('(Mt CO2-eq per year)'))), width=2),
-                    dbc.Col((html.Div(html.H5('(% per year)'))), width=2),
-                    ]),
+                    ],style={"background-color": "rgba(127,127,127,0.6)"}),
                 dbc.Row([
-                    dbc.Col((html.Div(html.H4('Electricity generation'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='electricity_emis_slider', min=slidersetting_dict['electricity_emis_slider_min'], max=slidersetting_dict['electricity_emis_slider_max'], value=slidersetting_dict['electricity_emis_slider_value'], step=slidersetting_dict['electricity_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['electricity_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='electricity_growth_slider', min=slidersetting_dict['electricity_growth_slider_min'], max=slidersetting_dict['electricity_growth_slider_max'], value=slidersetting_dict['electricity_growth_slider_value'], step=slidersetting_dict['electricity_growth_slider_steps'], marks=ast.literal_eval(slidersetting_dict['electricity_growth_slider_marks'])))), width=2),
-                    ],style={"background-color": "rgba(214,39,40,0.8)"}),
+                    dbc.Col((html.Div(html.H4('Manufacturing'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='manufacturing_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['manufacturing_emis_picker_value'], step=pickersetting_dict['manufacturing_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='manufacturing_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['manufacturing_valadd_picker_value'], step=pickersetting_dict['manufacturing_valadd_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    ],style={"background-color": "rgba(188,189,34,0.6)"}),
                 dbc.Row([
-                    dbc.Col((html.Div(html.H4('Sector'))), width=2),
-                    dbc.Col((html.Div(html.H4('Annaul emission reduction'))), width=2),
+                    dbc.Col((html.Div(html.H4('Gas, water & waste services'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='gas_water_waste_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['gas_water_waste_emis_picker_value'], step=pickersetting_dict['gas_water_waste_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='gas_water_waste_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['gas_water_waste_valadd_picker_value'], step=pickersetting_dict['gas_water_waste_valadd_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    ],style={"background-color": "rgba(227,119,194,0.6)"}),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('Construction'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='construction_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['construction_emis_picker_value'], step=pickersetting_dict['construction_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='construction_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['construction_valadd_picker_value'], step=pickersetting_dict['construction_valadd_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    ],style={"background-color": "rgba(31,119,180,0.6)"}),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('Commercial transport'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='com_transp_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['com_transp_emis_picker_value'], step=pickersetting_dict['com_transp_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='com_transp_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['com_transp_valadd_picker_value'], step=pickersetting_dict['com_transp_valadd_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    ],style={"background-color": "rgba(148,103,189,0.6)"}),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('Agriculture & Forestry'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='agrifor_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['agrifor_emis_picker_value'], step=pickersetting_dict['agrifor_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='agrifor_valadd_picker', type="number", bs_size="sm", value=pickersetting_dict['agrifor_valadd_picker_value'], step=pickersetting_dict['agrifor_valadd_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    ],style={"background-color": "rgba(44,160,44,0.6)"}),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('LULUCF'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='lulucf_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['lulucf_emis_picker_value'], step=pickersetting_dict['lulucf_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
                     dbc.Col((html.Div(html.H4(''))), width=2),
+					],style={"background-color": "rgba(140,86,75,0.6)"}),
+                dbc.Row([
+                    dbc.Col((html.Div(html.H4('Sector'))), width=3),
+                    dbc.Col((html.Div(html.H4('Annaul change in emissions by sector'))), width=4),
+                    dbc.Col((html.Div(html.H4('Electricity generation growth'))), width=4),
                     ]),
                 dbc.Row([
-                    dbc.Col((html.Div(html.H4(''))), width=2),
-                    dbc.Col((html.Div(html.H5('(Mt CO2-eq per year)'))), width=2),
-                    dbc.Col((html.Div(html.H4(''))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=3),
+                    dbc.Col((html.Div(html.H5('(Mt CO2-eq per year)'))), width=4),
+                    dbc.Col((html.Div(html.H5('(% per year)'))), width=4),
                     ]),
                 dbc.Row([
-                    dbc.Col((html.Div(html.H4('Residential'))), width=2),
-                    dbc.Col((html.Div(dcc.Slider(id='residential_emis_slider', min=slidersetting_dict['residential_emis_slider_min'], max=slidersetting_dict['residential_emis_slider_max'], value=slidersetting_dict['residential_emis_slider_value'], step=slidersetting_dict['residential_emis_slider_steps'], marks=ast.literal_eval(slidersetting_dict['residential_emis_slider_marks'])))), width=2),
-                    dbc.Col((html.Div(html.H4(''))), width=2),
-                    ],style={"background-color": "rgba(255,127,14,0.8)"}),
-                ], fluid=True, style={"padding": "20px 80px 20px 80px", 'backgroundColor': 'rgba(242, 241, 239, 1)', "position": "sticky", "top": 60, 'zIndex': 9999}), ### This is for padding aroudn the entire app: fill the entire screen, but keep padding top right bottom left at x pixels
-            dbc.Container([
+                    dbc.Col((html.Div(html.H4('Electricity generation'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='electricity_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['electricity_emis_picker_value'], step=pickersetting_dict['electricity_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    dbc.Col((html.Div(dbc.Input(id='electricity_growth_picker', type="number", bs_size="sm", value=pickersetting_dict['electricity_growth_picker_value'], step=pickersetting_dict['electricity_growth_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H5(''))), width=2),
+                    ],style={"background-color": "rgba(214,39,40,0.6)"}),
                 dbc.Row([
-                    dbc.Col(html.Div(dcc.Graph(id='emissions_total', figure = fig_emissions_total))),
-                    dbc.Col(html.Div(dcc.Graph(id='value_added_total', figure = fig_added_value_total))),
+                    dbc.Col((html.Div(html.H4('Sector'))), width=3),
+                    dbc.Col((html.Div(html.H4('Annaul emission change'))), width=4),
+                    dbc.Col((html.Div(html.H4(''))), width=4),
                     ]),
-                ], fluid=True, style={"padding": "20px 60px 20px 60px"}),
-            dbc.Container([
                 dbc.Row([
-                    dbc.Col(html.Div(dcc.Graph(id='emis_int', figure = fig_emis_int))),
-                    dbc.Col(html.Div(dcc.Graph(id='elec_gen_int', figure = fig_elec_gen_int))),
+                    dbc.Col((html.Div(html.H4(''))), width=3),
+                    dbc.Col((html.Div(html.H5('(Mt CO2-eq per year)'))), width=4),
+                    dbc.Col((html.Div(html.H4(''))), width=4),
                     ]),
-                ], fluid=True, style={"padding": "20px 60px 20px 60px"}),
-            dbc.Container([
                 dbc.Row([
-                    dbc.Col(html.Div(html.H4('Some other figure'))),
-                    dbc.Col(html.Div(html.H4('Some other figure'))),
+                    dbc.Col((html.Div(html.H4('Residential'))), width=3),
+                    dbc.Col((html.Div(dbc.Input(id='residential_emis_picker', type="number", bs_size="sm", value=pickersetting_dict['residential_emis_picker_value'], step=pickersetting_dict['residential_emis_picker_steps']))), width=2),
+                    dbc.Col((html.Div(html.H4(''))), width=4),
+                    ],style={"background-color": "rgba(255,127,14,0.6)"}),
+                dbc.Row([
+                    html.Div(html.H4('Provided by the Centre for Climate and Energy Policy, Crawford School of Public Policy, The Australian National University, with funding support by the 2050 Pathways Platform.')),
                     ]),
-                ], fluid=True, style={"padding": "20px 60px 20px 60px"}),
+                dbc.Row([
+                    html.Div(html.H4('Contact for queries and comments: ccep@anu.edu.au')),
+                    ]),
+                dbc.Row([
+                    html.Div(html.H4('Emission pathway tool concept and data compilation by Paul Wyrwoll, Jorrit Gosens, Zeba Anjum, Frank Jotzo.')),
+                    ]),
+                dbc.Row([
+                    html.Div(html.H4('Website & web application in Dash built by Jorrit Gosens.')),
+                    ]),
+                ], fluid=True, style={"padding": "20px 20px 20px 20px", 'backgroundColor': 'rgba(242, 241, 239, 1)', "position": "sticky", "top": 60, 'zIndex': 9999}), ### This is for padding aroudn the entire app: fill the entire screen, but keep padding top right bottom left at x pixels
             ])
     elif tab == 'docs':
         return html.Div([
@@ -315,20 +399,47 @@ def render_content(tab):
         return html.Div([
             html.H3('Here will be some other reports and links to the CCEP website etc')
             ])
+    
+    
+    
+    
+### Define app content based on tab choice. 
+### The picker value selection is a separate callback, below this block
+@app.callback(Output('tabslist-content', 'children'),
+              [Input('tabslist', 'value')])
+def render_content(tab):
+    if tab in statelist:
+        return html.Div([
+            dbc.Container([
+                dbc.Row([html.Div(dcc.Graph(id='emissions_total', figure = fig_emissions_total))]),
+                dbc.Row([html.Div(dcc.Graph(id='value_added_total', figure = fig_added_value_total))]),
+                dbc.Row([html.Div(dcc.Graph(id='emis_int', figure = fig_emis_int))]),
+                dbc.Row([html.Div(dcc.Graph(id='elec_gen_int', figure = fig_elec_gen_int))]),
+                dbc.Row([html.Div(html.H2('To Do: Residential per capita emissions'))]),
+                ]),
+            ])
+    elif tab == 'docs':
+        return html.Div([
+            html.H3('Here will be some documentation')
+            ])
+    elif tab == 'other':
+        return html.Div([
+            html.H3('Here will be some other reports and links to the CCEP website etc')
+            ])    
 
-### Update the emissions figure dynamically based on slider input
+### Update the emissions figure dynamically based on picker input
 @app.callback(
     Output('emissions_total', 'figure'),
-    [Input('agrifor_emis_slider', 'value'),
-     Input('com_transp_emis_slider', 'value'),
-     Input('construction_emis_slider', 'value'),
-     Input('electricity_emis_slider', 'value'),
-     Input('gas_water_waste_emis_slider', 'value'),
-     Input('manufacturing_emis_slider', 'value'),
-     Input('mining_emis_slider', 'value'),
-     Input('residential_emis_slider', 'value'),
-     Input('services_emis_slider', 'value'),
-     Input('lulucf_emis_slider', 'value'),
+    [Input('agrifor_emis_picker', 'value'),
+     Input('com_transp_emis_picker', 'value'),
+     Input('construction_emis_picker', 'value'),
+     Input('electricity_emis_picker', 'value'),
+     Input('gas_water_waste_emis_picker', 'value'),
+     Input('manufacturing_emis_picker', 'value'),
+     Input('mining_emis_picker', 'value'),
+     Input('residential_emis_picker', 'value'),
+     Input('services_emis_picker', 'value'),
+     Input('lulucf_emis_picker', 'value'),
      Input('tabslist', 'value')]
     )
 def update_figure_emisisons_total(agrifor_emis_trend, com_transp_emis_trend, construction_emis_trend, electricty_emis_trend, 
@@ -369,32 +480,33 @@ def update_figure_emisisons_total(agrifor_emis_trend, com_transp_emis_trend, con
     df_select.loc[(df_select['sector']=='LULUCF') & (df_select['yrs_since_final_obs']>0),'emissions_MtCo2_output'] = df_select['emissions_MtCo2_finaly']+lulucf_emis_trend*df_select['yrs_since_final_obs']
     ### Redefine emissions total figure again, with dynamic input
     fig_emissions_total = px.area(df_select, x="year", y="emissions_MtCo2_output", color="sector", 
-                                  color_discrete_sequence=['#1F77B4', '#FF7F0E', '#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
-                                    labels={"year": "", "emissions_MtCo2_output": "CO<sub>2</sub> Emissions (Mt CO<sub>2</sub>-eq/y)"},
-                                    title="CO<sub>2</sub>-emissions by industry")
-    fig_emissions_total.update_layout(transition_duration=500,
+                                  color_discrete_map=my_discrete_color_map,
+                                  labels={"year": "", "emissions_MtCo2_output": "CO<sub>2</sub> Emissions (Mt CO<sub>2</sub>-eq/y)"},
+                                  title="CO<sub>2</sub>-emissions by industry",
+                                  width=800, height=375)
+    fig_emissions_total.update_layout(transition_duration=350,
                                       template="plotly_white",
                                       legend_traceorder="reversed",
                                       title_font_color="#1F77B4",
                                       title_font_size=18,
                                       title_font_family="Rockwell",
                                       title_x = 0.02,
-                                      margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                      margin=dict(t=40, r=0, b=0, l=65, pad=0))
     fig_emissions_total.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     fig_emissions_total.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     return fig_emissions_total
 
-### Update the valadd figure dynamically based on slider input
+### Update the valadd figure dynamically based on picker input
 @app.callback(
     Output('value_added_total', 'figure'),
-    [Input('services_valadd_slider', 'value'),
-     Input('mining_valadd_slider', 'value'),
-     Input('manufacturing_valadd_slider', 'value'),
-     Input('gas_water_waste_valadd_slider', 'value'),
-     Input('construction_valadd_slider', 'value'),
-     Input('com_transp_valadd_slider', 'value'),
-     Input('agrifor_valadd_slider', 'value'),
-     Input('electricity_growth_slider', 'value'),
+    [Input('services_valadd_picker', 'value'),
+     Input('mining_valadd_picker', 'value'),
+     Input('manufacturing_valadd_picker', 'value'),
+     Input('gas_water_waste_valadd_picker', 'value'),
+     Input('construction_valadd_picker', 'value'),
+     Input('com_transp_valadd_picker', 'value'),
+     Input('agrifor_valadd_picker', 'value'),
+     Input('electricity_growth_picker', 'value'),
      Input('tabslist', 'value')]
     )
 def update_figure_valadds_total(services_valadd_trend, mining_valadd_trend, manufacturing_valadd_trend, gas_water_waste_valadd_trend, 
@@ -402,7 +514,7 @@ def update_figure_valadds_total(services_valadd_trend, mining_valadd_trend, manu
                                 electricity_growth_trend, tab):
     df_select = df_full[(df_full['geo']==tab) & (df_full['year']>=2009) & (df_full['sector']!="Overall")]
     ### Value added calculation:
-    ### For value added trends, we need slider 1 plus slider value 
+    ### For value added trends, we need picker 1 plus picker value 
     df_select.loc[(df_select['sector']=='Services') & (df_select['yrs_since_final_obs']>0),'ind_val_add_output'] = df_select['ind_val_add_2019_bln_finaly']*np.power((1+(services_valadd_trend/100)),df_select['yrs_since_final_obs'])
     df_select.loc[(df_select['sector']=='Mining') & (df_select['yrs_since_final_obs']>0),'ind_val_add_output'] = df_select['ind_val_add_2019_bln_finaly']*np.power((1+(mining_valadd_trend/100)),df_select['yrs_since_final_obs'])
     df_select.loc[(df_select['sector']=='Manufacturing') & (df_select['yrs_since_final_obs']>0),'ind_val_add_output'] = df_select['ind_val_add_2019_bln_finaly']*np.power((1+(manufacturing_valadd_trend/100)),df_select['yrs_since_final_obs'])
@@ -417,17 +529,18 @@ def update_figure_valadds_total(services_valadd_trend, mining_valadd_trend, manu
     df_select_val_add = df_select[df_select.sector != 'LULUCF']
     df_select_val_add = df_select_val_add[df_select_val_add .sector != 'Residential']
     fig_added_value_total = px.area(df_select_val_add, x="year", y="ind_val_add_output", color="sector",
-                                    color_discrete_sequence=['#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
+                                    color_discrete_map=my_discrete_color_map,
                                     labels={"year": "", "ind_val_add_output": "Value added (billion 2019 AUD)<sub> </sub>"},
-                                    title="Value added by industry")
-    fig_added_value_total.update_layout(transition_duration=500,
+                                    title="Value added by industry",
+                                    width=800, height=375)
+    fig_added_value_total.update_layout(transition_duration=350,
                                         template="plotly_white",
                                         legend_traceorder="reversed",
                                         title_font_color="#1F77B4",
                                         title_font_size=18,
                                         title_font_family="Rockwell",
                                         title_x = 0.02,
-                                        margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                        margin=dict(t=40, r=0, b=0, l=65, pad=0))
     fig_added_value_total.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     fig_added_value_total.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     return fig_added_value_total
@@ -435,22 +548,22 @@ def update_figure_valadds_total(services_valadd_trend, mining_valadd_trend, manu
 ### Update the emission intensity figure dynamically based on inputs already calculated above
 @app.callback(
     Output('emis_int', 'figure'),
-    [Input('agrifor_emis_slider', 'value'),
-     Input('com_transp_emis_slider', 'value'),
-     Input('construction_emis_slider', 'value'),
-     Input('electricity_emis_slider', 'value'),
-     Input('gas_water_waste_emis_slider', 'value'),
-     Input('manufacturing_emis_slider', 'value'),
-     Input('mining_emis_slider', 'value'),
-     Input('services_emis_slider', 'value'),
-     Input('services_valadd_slider', 'value'),
-     Input('mining_valadd_slider', 'value'),
-     Input('manufacturing_valadd_slider', 'value'),
-     Input('gas_water_waste_valadd_slider', 'value'),
-     Input('construction_valadd_slider', 'value'),
-     Input('com_transp_valadd_slider', 'value'),
-     Input('agrifor_valadd_slider', 'value'),
-     Input('electricity_growth_slider', 'value'),
+    [Input('agrifor_emis_picker', 'value'),
+     Input('com_transp_emis_picker', 'value'),
+     Input('construction_emis_picker', 'value'),
+     Input('electricity_emis_picker', 'value'),
+     Input('gas_water_waste_emis_picker', 'value'),
+     Input('manufacturing_emis_picker', 'value'),
+     Input('mining_emis_picker', 'value'),
+     Input('services_emis_picker', 'value'),
+     Input('services_valadd_picker', 'value'),
+     Input('mining_valadd_picker', 'value'),
+     Input('manufacturing_valadd_picker', 'value'),
+     Input('gas_water_waste_valadd_picker', 'value'),
+     Input('construction_valadd_picker', 'value'),
+     Input('com_transp_valadd_picker', 'value'),
+     Input('agrifor_valadd_picker', 'value'),
+     Input('electricity_growth_picker', 'value'),
      Input('tabslist', 'value')]
     )
 def update_figure_emis_int(agrifor_emis_trend, com_transp_emis_trend, construction_emis_trend, electricty_emis_trend, 
@@ -487,7 +600,7 @@ def update_figure_emis_int(agrifor_emis_trend, com_transp_emis_trend, constructi
     df_select.loc[(df_select['sector']=='Services') & (df_select['emissions_MtCo2_output']<0), 'emissions_MtCo2_output'] = 0
     
     ### Value added calculation:
-    ### For value added trends, we need slider 1 plus slider value 
+    ### For value added trends, we need picker 1 plus picker value 
     df_select.loc[(df_select['sector']=='Services') & (df_select['yrs_since_final_obs']>0),'ind_val_add_output'] = df_select['ind_val_add_2019_bln_finaly']*np.power((1+(services_valadd_trend/100)),df_select['yrs_since_final_obs'])
     df_select.loc[(df_select['sector']=='Mining') & (df_select['yrs_since_final_obs']>0),'ind_val_add_output'] = df_select['ind_val_add_2019_bln_finaly']*np.power((1+(mining_valadd_trend/100)),df_select['yrs_since_final_obs'])
     df_select.loc[(df_select['sector']=='Manufacturing') & (df_select['yrs_since_final_obs']>0),'ind_val_add_output'] = df_select['ind_val_add_2019_bln_finaly']*np.power((1+(manufacturing_valadd_trend/100)),df_select['yrs_since_final_obs'])
@@ -506,24 +619,25 @@ def update_figure_emis_int(agrifor_emis_trend, com_transp_emis_trend, constructi
     fig_emis_int = px.line(df_select_emis_int, x="year", y="emis_int_outp", color="sector",
                                     color_discrete_sequence=['#D62728', '#2CA02C', '#9467BD', '#8C564B', '#E377C2', '#BCBD22', '#7F7F7F', '#17BECF'],
                                     labels={"year": "", "emis_int_outp": "Emission intensity (kg CO<sub>2</sub>-eq/2019 AUD)"},
-                                    title="Emission intensity by industry")
+                                    title="Emission intensity by industry",
+                                    width=800, height=375)
     fig_emis_int.update_layout(template="plotly_white",
                                         legend_traceorder="reversed",
                                         title_font_color="#1F77B4",
                                         title_font_size=18,
                                         title_font_family="Rockwell",
                                         title_x = 0.02,
-                                        margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                        margin=dict(t=40, r=0, b=0, l=65, pad=0))
     fig_emis_int.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     fig_emis_int.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     return fig_emis_int
 
 
-### Update the elec generation and emission intensity dynamically based on slider input
+### Update the elec generation and emission intensity dynamically based on picker input
 @app.callback(
     Output('elec_gen_int', 'figure'),
-    [Input('electricity_emis_slider', 'value'),
-     Input('electricity_growth_slider', 'value'),
+    [Input('electricity_emis_picker', 'value'),
+     Input('electricity_growth_picker', 'value'),
      Input('tabslist', 'value')]
     )
 def update_figure_elec_gen_emis(electricty_emis_trend, electricity_growth_trend, tab):
@@ -536,7 +650,6 @@ def update_figure_elec_gen_emis(electricty_emis_trend, electricity_growth_trend,
     ### Calculate emission intensity:
     df_select_elec['elec_carb_int_outp']=1000*df_select_elec['emissions_MtCo2_output']/df_select_elec['elec_gen_GWh_output']
     ### Redefine Electricity generation and carbon intensity figure again, but with dynamic input
-    #df_select_elec = df_select_elec[df_select_elec.sector=="Electricity generation"]
     # Make lists of data again because of course this type of figure has a completley different syntax again
     year_dict = df_select_elec['year'].tolist()
     gwh_dict = df_select_elec['elec_gen_GWh_output'].tolist()
@@ -553,7 +666,8 @@ def update_figure_elec_gen_emis(electricty_emis_trend, electricity_growth_trend,
                                         title_font_size=18,
                                         title_font_family="Rockwell",
                                         title_x = 0.02,
-                                        margin=dict(t=40, r=0, b=0, l=60, pad=0))
+                                        margin=dict(t=40, r=0, b=0, l=65, pad=0),
+                                        width=800, height=375)
     fig_elec_gen_int.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     fig_elec_gen_int.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='rgba(149, 165, 166, 0.6)', mirror=True)
     # Set y-axes titles
@@ -562,20 +676,6 @@ def update_figure_elec_gen_emis(electricty_emis_trend, electricity_growth_trend,
     return fig_elec_gen_int
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False,dev_tools_ui=False,dev_tools_props_check=False)
     
-
